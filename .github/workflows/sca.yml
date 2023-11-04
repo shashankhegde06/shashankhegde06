@@ -1,4 +1,4 @@
-name: 20 SCA
+name: SCA Python project
 
 on:
   workflow_dispatch:
@@ -9,56 +9,40 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ "ubuntu-20.04" ] # [ "macos-latest", "windows-latest", "ubuntu-20.04" ]
-        # Test once with explicit manifest_file, and once without
-        manifest_file: [ "pom.xml" ]
+        os: [ "windows-latest" ] # Adjust the OS as needed
+        manifest_file: [ "requirements.txt" ] # Adjust the manifest file as needed
     runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        shell: bash
-    name: SCA Java project
+    name: SCA Python project
     steps:
       - name: Checkout action
         uses: actions/checkout@v3
 
-      - name: Setup Java
-        uses: actions/setup-java@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
         with:
-          distribution: temurin
-          java-version: 11
-          cache: maven
+          python-version: 3.x # Choose the Python version you want to use
 
       - name: Install SCA tool (CRDA)
-        uses: redhat-actions/openshift-tools-installer@v1
-        with:
-          source: github
-          github_pat: ${{ github.token }}
-          crda: "latest"
+        run: |
+          pip install crda
 
-      #- name: SCA (CRDA) Scan
-      #  id: crda_scan
-      #  uses: redhat-actions/crda@v1.2
-      #  with:
-      #    manifest_file: ${{ matrix.manifest_file }}
-      #    snyk_token: ${{ secrets.OUR_SNYK_KEY }}
-      #    fail_on: never
+      - name: SCA (CRDA) Scan
+        run: |
+          crda scan --manifest ${{ matrix.manifest_file }}
+          # Add any additional options or arguments as needed
 
       - name: Print JSON analysis report
-        if: ${{ always() && steps.scan.outputs.crda_report_json }}
-        run: cat ${{ steps.scan.outputs.crda_report_json }}
+        run: |
+          cat crda-report.json
 
       - name: Print SARIF analysis report
-        if: ${{ always() && steps.scan.outputs.crda_report_sarif }}
-        run: cat ${{ steps.scan.outputs.crda_report_sarif }}
+        run: |
+          cat crda-report.sarif
 
       - name: Print Report Link
-        run: echo ${{ steps.scan.outputs.report_link }}
+        run: |
+          echo "Report Link: https://example.com/reports/crda-report.html"
 
       - name: Print Artifact Name
         run: |
-          echo ${{ steps.scan.outputs.artifact_name }}
-          if [ $RUNNER_OS == 'Windows' ]; then
-            echo "::set-output name=artifact_name::$($env:artifact_name)"
-          else
-            echo "::set-output name=artifact_name::${{ steps.scan.outputs.artifact_name }}"
-          fi
+          echo "Artifact Name: YourArtifactName"
