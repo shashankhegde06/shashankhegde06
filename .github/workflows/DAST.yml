@@ -1,4 +1,4 @@
-name: DAST Testing Workflow
+name: DAST Scan Workflow
 
 on:
   push:
@@ -6,28 +6,9 @@ on:
       - main
 
 jobs:
-  build:
-    runs-on: windows-latest
-    
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-
-      # Add steps to build and deploy your application for Windows.
-      # For example, if you're using a .NET project:
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 5.0
-
-      - name: Build
-        run: dotnet build --configuration Release
-
-      # Add additional build and deploy steps as needed.
-
   security_scan:
     runs-on: windows-latest
-    
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -38,7 +19,7 @@ jobs:
           Start-Process -FilePath 'ZAP_2.11.0_Windows.exe' -ArgumentList '/S' -Wait
 
       - name: Run ZAP Scan
-        run: Start-Process -FilePath 'C:\Program Files\OWASP\Zed Attack Proxy\zap.bat' -ArgumentList '-daemon -port 8080 -config api.disablekey=true' -Wait
+        run: Start-Process -FilePath 'C:\Program Files\OWASP\Zed Attack Proxy\zap.bat' -ArgumentList '-daemon -port 8080 -config api.key=ubiu6uordtpp2qqm51hvlbqcuq' -Wait
 
       # Add steps to test your application with ZAP, e.g., using a PowerShell script.
 
@@ -46,10 +27,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: zap-report
-          path: C:\path\to\zap\report
-
-  deploy:
-    runs-on: windows-latest
-
-    # Add steps to deploy your application for Windows.
-
+          path: C:\Users\Dell\Downloads\ZAP_2_14_0_windows.exe\report
