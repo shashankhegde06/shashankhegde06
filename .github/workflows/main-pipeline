@@ -28,7 +28,7 @@ jobs:
   license-compliance:
     needs: build
     name: License compliance
-    uses: ./.github/workflows/license-compliance.yml
+    uses: ./.github/workflows/license.yml
     secrets: inherit
 
   docker:
@@ -40,7 +40,7 @@ jobs:
   container-image-scan:
     needs: docker
     name: Build docker image
-    uses: ./.github/workflows/container-image-scan.yml
+    uses: ./.github/workflows/container.yml
     secrets: inherit
     with:
       image-tag: ${{ needs.docker.outputs.image-tag }}
@@ -52,4 +52,10 @@ jobs:
     secrets: inherit
     with:
       image-tag: ${{ needs.docker.outputs.image-tag }}
+
+  linter:
+    needs: build
+    name: Scan 
+    uses: ./.github/workflows/linter.yml
+    secrets: inherit
  
