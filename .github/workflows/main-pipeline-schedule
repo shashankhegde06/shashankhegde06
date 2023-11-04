@@ -1,0 +1,89 @@
+name: 00 - Schedule Main CI / CD Pipeline
+
+on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string, this is always UTC -> d.h. subtract 1h for CET. run saturday
+    - cron:  '28 14 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10 # Choose the Python version you want to use
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt # Replace with the actual path to your requirements file
+
+      - name: Build step
+        run: |
+          # Add your build commands here
+
+  sca:
+    needs: build
+    name: SCA
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install SCA tool
+        run: pip install sca-tool # Replace with the actual name of the SCA tool package
+
+      - name: SCA Scan
+        run: sca-tool scan
+
+  sast:
+    needs: build
+    name: SAST
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10
+
+      - name: Install SAST tool
+        run: pip install bandit # Replace with the actual name of the SAST tool package
+
+      - name: SAST Scan
+        run: sast-tool scan
+
+  docker:
+    needs: build
+    name: Build docker image
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build docker image
+        run: docker build -t my-python-app .
+
+  container-image-scan:
+    needs: docker
+    name: Container Image Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up container image scanner
+        uses: docker/setup-qemu-action@v1
+
+      - name: Scan container image
+        run: trivy image my-python-app # Replace with the actual name of your container image
