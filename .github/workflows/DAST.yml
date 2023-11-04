@@ -1,30 +1,48 @@
-name: DAST Scan Workflow
+name: 50 DAST Scan Docker Image
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      image-tag:
+        type: string
+        description: 'The name of the docker image to scan'
+        required: true
+
+  workflow_call:
+    inputs:
+      image-tag:
+        type: string
+        description: 'The name of the docker image to scan'
+        required: true
+
+env:
+  # used for docker
+  REGISTRY: ghcr.io
+  IMAGE_TAG: ${{ inputs.image-tag || github.event.inputs.image-tag }}
 
 jobs:
-  security_scan:
+  dast-scan:
+    name: DAST Scan
     runs-on: windows-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-
-      - name: Download ZAP
-        run: |
-          Invoke-WebRequest -Uri 'https://github.com/zaproxy/zaproxy/releases/download/v2.11.0/ZAP_2.11.0_Windows.exe' -OutFile 'ZAP_2.11.0_Windows.exe'
-          Start-Process -FilePath 'ZAP_2.11.0_Windows.exe' -ArgumentList '/S' -Wait
-
-      - name: Run ZAP Scan
-        run: Start-Process -FilePath 'C:\Program Files\OWASP\Zed Attack Proxy\zap.bat' -ArgumentList '-daemon -port 8080 -config api.key=ubiu6uordtpp2qqm51hvlbqcuq' -Wait
-
-      # Add steps to test your application with ZAP, e.g., using a PowerShell script.
-
-      - name: Upload ZAP Report
-        uses: actions/upload-artifact@v2
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2.1.0
         with:
-          name: zap-report
-          path: C:\Users\Dell\Downloads\ZAP_2_14_0_windows.exe\report
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Run ZAP OWASP full scan
+        uses: zaproxy/action-full-scan@v0.4.0
+        with:
+          docker_name: 'owasp/zap2docker-stable'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          target: 'http://localhost:8080'
+          cmd_options: '-a -j -l WARN -z "-addoninstallall" '
+          allow_issue_writing: true
+
+      - name: Upload html report
+        uses: actions/upload-artifact@v3
+        with:
+          name: DAST_Report.html
+          path: report_html.html
