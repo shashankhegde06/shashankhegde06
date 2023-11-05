@@ -4,10 +4,8 @@ def calculate_sum(n):
         total += i
     return total
 
-# Get user input
 n = int(input("Enter a positive integer: "))
 
-# Check if the input is valid
 if n <= 0:
     print("Please enter a positive integer.")
 else:
