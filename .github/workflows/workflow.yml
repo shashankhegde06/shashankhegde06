@@ -1,17 +1,18 @@
-name  : automating workflow
+name: automating workflow
 
 on:
   push:
-    branched:
-      -main
-  
+    branches:
+      - main
+
   workflow_dispatch:
 
 jobs:
   greet:
-    run-on: windows latest
-    step:
-      -uses:actions/checkout@v2
-      -name: hello world
-        run: echo "hello world!"
-        shell:bash
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      
+      - name: Hello World
+        run: echo "Hello, world!"
