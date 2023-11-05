@@ -3,7 +3,7 @@ name: Push to Another Repository
 on:
   push:
     branches:
-      - main  # Replace with the source branch you want to trigger the workflow
+      - main
 
 jobs:
   push_code:
@@ -15,15 +15,15 @@ jobs:
 
       - name: Push to Target Repository
         run: |
-          :: Set up Git user
+          REM Set up Git user
           git config --global user.name "shashankhegde06"
           git config --global user.email "eng21ct0036@dsu.edu.in"
 
-          :: Add the target repository as a remote
+          REM Add the target repository as a remote
           git remote add target-repo https://github.com/shashankhegde06/shashankhegde06.git
 
-          :: Push the code to the target repository
-          git push target-repo main:main  # Replace 'main' with the appropriate branch
+          REM Push the code to the target repository
+          git push target-repo main:main
 
         env:
           GITHUB_TOKEN: ${{ secrets.MY_SECRET_KEY }}
