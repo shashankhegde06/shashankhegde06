@@ -1,10 +1,10 @@
-import os
-
-def insecure_file_operation():
+def secure_file_operation():
     file_path = "/etc/passwd"
-    if os.path.exists(file_path):
+    try:
         with open(file_path, "r") as file:
             content = file.read()
             print(content)
+    except FileNotFoundError:
+        print(f"File '{file_path}' not found.")
 
-insecure_file_operation()
+secure_file_operation()
