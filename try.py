@@ -6,8 +6,8 @@ def calculate_sum(n):
 
 n = int(input("Enter a positive integer: "))
 
- if n <= 0:
-  print("Please enter a positive integer."
+if n <= 0:
+    print("Please enter a positive integer.")
 else:
     result = calculate_sum(n)
     print(f"The sum of the first {n} numbers is: {result}")
