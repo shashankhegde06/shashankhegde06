@@ -1,0 +1,30 @@
+name: ZAP Security Scan
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  zap-scan:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Download ZAP
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/zaproxy/zaproxy/releases/download/v2.11.0/ZAP_2.11.0_windows-x64.zip" -OutFile "ZAP.zip"
+          Expand-Archive -Path "ZAP.zip" -DestinationPath "ZAP"
+
+      - name: Run ZAP Scan
+        run: |
+          $env:ZAP_PATH = "$(Get-Location)\ZAP\ZAP_2.11.0"
+          Start-Process -FilePath "$env:ZAP_PATH\zap.bat" -ArgumentList "-cmd -quickurl http://localhost:8000 -quickout C:\path\to\zap_report.html" -NoNewWindow -Wait
+
+      - name: Upload ZAP Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: ZAP_Report
+          path: C:\users\dell\report.html
