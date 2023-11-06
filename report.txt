@@ -1,0 +1,20 @@
+# ZAP scanning report
+
+## Summary
+
+* 1 vulnerability found
+* 0 warnings found
+
+## Vulnerabilities
+
+* **Cross-site scripting (XSS)**
+    * Path: /index.php
+    * CWE: CWE-80
+    * Description: This vulnerability allows an attacker to inject malicious code into a web page, which can then be executed by unsuspecting users.
+    * Remediation: Remove the ability to inject user-supplied data into the page.
+
+## Recommendations
+
+* Fix the vulnerabilities found in this report.
+* Configure ZAP to scan for more vulnerabilities.
+* Use ZAP to scan your web application regularly.
