@@ -1,30 +1,30 @@
-name: ZAP Security Scan
+name: ZAP Full Scan
 
 on:
   push:
-    branches:
-      - main
+    branches: [security]
 
-jobs:
-  zap-scan:
-    runs-on: windows-latest
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+steps:
+  - name: Checkout code
+    uses: actions/checkout@v3
 
-      - name: Download ZAP
-        run: |
-          Invoke-WebRequest -Uri "https://github.com/zaproxy/zaproxy/releases/download/v2.11.0/ZAP_2.11.0_windows-x64.zip" -OutFile "ZAP.zip"
-          Expand-Archive -Path "ZAP.zip" -DestinationPath "ZAP"
+  - name: Set up Python
+    uses: actions/setup-python@v3
+    with:
+      python-version: 3.12
 
-      - name: Run ZAP Scan
-        run: |
-          $env:ZAP_PATH = "$(Get-Location)\ZAP\ZAP_2.11.0"
-          Start-Process -FilePath "$env:ZAP_PATH\zap.bat" -ArgumentList "-cmd -quickurl http://localhost:8000 -quickout C:\path\to\zap_report.html" -NoNewWindow -Wait
+  - name: Install dependencies
+    run: |
+      sudo pip install -r requirements.txt
+      sudo python app.py &
 
-      - name: Upload ZAP Report
-        uses: actions/upload-artifact@v2
-        with:
-          name: ZAP_Report
-          path: C:\users\dell\report.html
+  - name: ZAP Scan
+    uses: zaproxy/action-full-scan@v0.7.0
+    with:
+      target: 'https://github.com/shashankhegde06/CompTry'
+      artifact_name: 'DAST-results-zap_scan'
+
+  - name: Exit ZAP
+    run: exit
